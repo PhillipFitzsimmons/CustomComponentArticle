@@ -22,14 +22,7 @@ Resources:
     Properties:
       ServiceToken: !GetAtt WeatherComponent.Arn
       Bucket: wwdd.bucket
-      AParameter: some parameter 4
-      #Create. Returns id-1582118070152
-      #Update id-1582118070152. Backs up id-1582118070152. Returns id-1582118135273
-      #Delete id-1582118070152. Commit. Deletes backup id-1582118070152
-      #Update id-1582118135273. 
-      #Delete id-1582118135273. Commit. Deletes backup 
-
-
+      AParameter: some parameter to update to force deploy
 
   DummyComponent:
     Type: AWS::Serverless::Function

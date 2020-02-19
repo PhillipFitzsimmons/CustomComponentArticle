@@ -12,7 +12,7 @@ const request = require('request');
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
 //The key is obscured for this published version, but you can get your own at openweathermap.org
-const WEATHER_API_KEY='c3ce86e6d2e9b5e631986bbfc08f7b22';
+const WEATHER_API_KEY='****************************';
 const WEATHER_API = `http://api.openweathermap.org/data/2.5/weather?q=nice,fr&units=metric&appid=${WEATHER_API_KEY}`;
 const FILE_KEY="weatherData.json"
 //debugMessage is appended with a lifecycle status and, in the case of a global failure, returned as the Reason
