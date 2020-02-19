@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  CustomComponent article template
+Globals:
+  Function:
+    Timeout: 59
+    Runtime: nodejs12.x
+    Handler: index.handler
+Resources:
+  WeatherComponent:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: weather-component/
+      Runtime: nodejs12.x
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn
+  WeatherComponentDeployment:
+    Type: Custom::WeatherComponent
+    DependsOn:
+      - WeatherComponent
+    Properties:
+      ServiceToken: !GetAtt WeatherComponent.Arn
+      Bucket: wwdd.bucket
+      AParameter: some parameter 4
+      #Create. Returns id-1582118070152
+      #Update id-1582118070152. Backs up id-1582118070152. Returns id-1582118135273
+      #Delete id-1582118070152. Commit. Deletes backup id-1582118070152
+      #Update id-1582118135273. 
+      #Delete id-1582118135273. Commit. Deletes backup 
+
+
+
+  DummyComponent:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dummy-resource/
+      Runtime: nodejs12.x
+      Role: 
+        !GetAtt LambdaExecutionRole.Arn
+  DummyDeployment:
+    Type: Custom::DummyComponent
+    DependsOn:
+      - DummyComponent
+    Properties:
+      ServiceToken: !GetAtt DummyComponent.Arn
+      Fail: 'true'
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        !Join [
+          '-',
+          [
+            !Ref 'AWS::StackName',
+            'LambdaExecutionRole'
+          ],
+        ]
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName:
+            Fn::Join:
+              - '-'
+              - - !Ref AWS::StackName
+                - WriteLogPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - iam:getRolePolicy
+                Resource: '*'
+        - PolicyName:
+            Fn::Join:
+              - '-'
+              - - !Ref AWS::StackName
+                - S3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource: 
+                  - 'arn:aws:s3:::*'
+                  - 'arn:aws:s3:::*/*'
+        - PolicyName:
+            Fn::Join:
+              - '-'
+              - - !Ref AWS::StackName
+                - IamPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:getRolePolicy
+                  - iam:putRolePolicy
+                  - iam:deleteRolePolicy
+                Resource: '*'
+Outputs:
+  TemperatureInNice:
+    Value: !GetAtt WeatherComponentDeployment.Temperature
+  SkyInNice:
+    Value: !GetAtt WeatherComponentDeployment.Conditions
