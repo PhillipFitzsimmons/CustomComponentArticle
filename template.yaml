@@ -24,21 +24,40 @@ Resources:
       Bucket: wwdd.bucket
       AParameter: some parameter to update to force deploy
 
-  DummyComponent:
+#  DummyComponent:
+#    Type: AWS::Serverless::Function
+#    Properties:
+#      CodeUri: dummy-resource/
+#      Runtime: nodejs12.x
+#      Role: 
+#        !GetAtt LambdaExecutionRole.Arn
+#  DummyDeployment:
+#    Type: Custom::DummyComponent
+#   DependsOn:
+#      - DummyComponent
+#    Properties:
+#      ServiceToken: !GetAtt DummyComponent.Arn
+#      Fail: 'false'
+  ReactDeployer:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: dummy-resource/
+      CodeUri: react-deployer/
       Runtime: nodejs12.x
       Role: 
         !GetAtt LambdaExecutionRole.Arn
-  DummyDeployment:
-    Type: Custom::DummyComponent
-    DependsOn:
-      - DummyComponent
+  ReactDeployment:
+    Type: Custom::ReactDeployer
+    DependsOn: ReactDeployer
     Properties:
-      ServiceToken: !GetAtt DummyComponent.Arn
-      Fail: 'true'
-
+      ServiceToken: !GetAtt ReactDeployer.Arn
+      Bucket: wwdd-build-bucket-us-east-1
+      TargetDirectory: flashgang-deploy-test
+      AParam: one
+  ReactHashMacro:
+    Type: AWS::CloudFormation::Macro
+      Properties:
+        FunctionName: !GetAtt ReactDeployer.Arn
+        Name: !Sub ${AWS::Stack}-ReactHashMacro
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
